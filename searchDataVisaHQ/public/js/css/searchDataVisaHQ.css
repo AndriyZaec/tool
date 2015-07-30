@@ -1,0 +1,18 @@
+body {
+    padding-top: 1%;
+    padding-bottom: 1%;
+}
+
+.row {
+    text-align: center;
+    margin: 1%;
+}
+
+#modal_button {
+    position:fixed;
+    cursor:pointer;
+    right: 0px;
+    top: 0px;
+    height: 5%;
+    width: 1%;
+}
