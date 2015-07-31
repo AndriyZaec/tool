@@ -5,6 +5,35 @@ require_once('lib/phpQuery.php');
 
 /**
  * @param $url
+ * @param array $advanced_options
+ * @return mixed
+ */
+function get_content($url,$advanced_options=array()){
+    $ch = curl_init();
+    $encUrl = $url;
+    $options = array(
+        CURLOPT_RETURNTRANSFER => true,	 // return web page
+        CURLOPT_HEADER	 => false,	// don't return headers
+        CURLOPT_FOLLOWLOCATION => false,	 // follow redirects
+        CURLOPT_ENCODING	 => "",	 // handle all encodings
+        CURLOPT_USERAGENT	 => 'MJ12bot', // who am i
+        CURLOPT_REFERER => 'http://localhost/',
+        CURLOPT_AUTOREFERER	=> true,	 // set referer on redirect
+        CURLOPT_CONNECTTIMEOUT => 5,	 // timeout on connect
+        CURLOPT_TIMEOUT	 => 10,	 //timeout on response
+        CURLOPT_MAXREDIRS	 => 3,	 //stop after 10 redirects
+        CURLOPT_URL	 => $encUrl,
+        CURLOPT_SSL_VERIFYHOST => 0,
+        CURLOPT_SSL_VERIFYPEER => false,
+    );
+    $options=$advanced_options+$options;
+    curl_setopt_array($ch, $options);
+    $content = curl_exec($ch);
+    return $content;
+}
+
+/**
+ * @param $url
  * @return mixed
  */
 function getStatusCode($url){
@@ -16,6 +45,23 @@ function getStatusCode($url){
     curl_exec($ch);
     $status_code = curl_getinfo($ch,CURLINFO_HTTP_CODE);
     return $status_code;
+}
+
+/**
+ * @param $robots
+ * @return array
+ */
+function robots_ms($robots){
+    $ms=array_map(function($val){
+        if ($val!='') {
+            $val=trim($val);
+            return($val);
+        }
+
+    }, explode("\n", $robots));
+    $ms=array_diff($ms,array(''));
+    sort($ms);
+    return $ms;
 }
 
 /**
@@ -61,6 +107,46 @@ function findDuplicate($ms){
     }
     return $res;
 }
+
+/**
+ * @param $domains
+ * @param $robots
+ * @return array
+ */
+function robot_test ($domains, $robots) {
+    for($i=2;$i<count($domains);$i++) {
+        $domainsList[$i] = explode("\n", $domains[$i]);
+        $robotsList[$i] = explode("\n", $robots[$i]);
+        array_pop($domainsList[$i]);
+        array_pop($robotsList[$i]);
+        $count_domains=count($domainsList[$i]);
+        for ($j=0; $j<$count_domains; $j++) {
+            $domainsList[$i][$j]=trim($domainsList[$i][$j]);
+            if (substr_count($domainsList[$i][$j], 'https://')>0 || substr_count($domainsList[$i][$j], 'http://')>0) {
+                echo $robots_url=$domainsList[$i][$j]."/robots.txt";
+            }
+            else{
+                $robots_url="http://www.".$domainsList[$i][$j]."/robots.txt";
+            }
+            $get_visa_robots=get_content($robots_url);
+              $visa_robots_ms=robots_ms($get_visa_robots);print_r($visa_robots_ms);}}
+//            if (count($robotsList)!=count($visa_robots_ms)) {
+//                $check_robots_result[][$robots_url]='Не идентичны';
+//            }
+//            else{
+//                $tmp_res=array_diff($robotsList, $visa_robots_ms);
+//                if (count($tmp_res)!=0) {
+//                    $check_robots_result[][$robots_url]='Не идентичны';
+//                }
+//                else{
+//                    $check_robots_result[][$robots_url]='Идентичны';
+//                }
+//            }
+//        }
+
+        //return $check_robots_result;
+    }
+//}
 //------------------------------------------------------------------------------------------------
 
 if($_POST['action']=='getHtmlErrors'){
@@ -143,10 +229,17 @@ if($_POST['action']=='getDuplicateTags'){
         }
     }
 }
-if($_POST['action']=='checkRobots'){
-    $str=$_POST['domains'][2];
-    $str=explode("&nbsp;",$str);
-    print_r($str);
+if($_POST['action']=='checkRobots') {
+    $domains = $_POST['domains'];
+    $robots  = $_POST['robots'];
+    $resultArr=robot_test($domains,$robots);
+    foreach ($resultArr as $value) {
+        foreach ($value as $key => $val) {
+            $str.="<tr><td>$key</td><td>$val</td>";
+        }
+
+    }
+    echo $str;
 }
 
 

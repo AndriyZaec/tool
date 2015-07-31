@@ -254,11 +254,11 @@
         var robot,domain,i;
         for(i=0;i<=count;i++){
             robot=$("#Robots"+i).val();
-            robotsArr.push(robot);
+            robotsArr.push(robot+"\n");
         }
         for(i=0;i<=count;i++){
             domain=$("#Domains"+i).val();
-            domainsArr.push(domain);
+            domainsArr.push(domain+"\n");
         }
         checkRobots(robotsArr,domainsArr,'checkRobots');
     }
