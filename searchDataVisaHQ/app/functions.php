@@ -60,7 +60,7 @@ function robots_ms($robots){
 
     }, explode("\n", $robots));
     $ms=array_diff($ms,array(''));
-    sort($ms);
+    //sort($ms);
     return $ms;
 }
 
@@ -129,24 +129,23 @@ function robot_test ($domains, $robots) {
                 $robots_url="http://www.".$domainsList[$i][$j]."/robots.txt";
             }
             $get_visa_robots=get_content($robots_url);
-              $visa_robots_ms=robots_ms($get_visa_robots);print_r($visa_robots_ms);}}
-//            if (count($robotsList)!=count($visa_robots_ms)) {
-//                $check_robots_result[][$robots_url]='Не идентичны';
-//            }
-//            else{
-//                $tmp_res=array_diff($robotsList, $visa_robots_ms);
-//                if (count($tmp_res)!=0) {
-//                    $check_robots_result[][$robots_url]='Не идентичны';
-//                }
-//                else{
-//                    $check_robots_result[][$robots_url]='Идентичны';
-//                }
-//            }
-//        }
-
-        //return $check_robots_result;
+            $visa_robots_ms=robots_ms($get_visa_robots);
+            if (count($robotsList[$i])!=count($visa_robots_ms)) {
+                $check_robots_result[][$robots_url]='Не идентичны';
+            }
+            else{
+                $tmp_res=array_diff($robotsList[$i], $visa_robots_ms);
+                if (count($tmp_res)!=0) {
+                    $check_robots_result[][$robots_url]='Не идентичны';
+                }
+                else{
+                    $check_robots_result[][$robots_url]='Идентичны';
+                }
+            }
+        }
+        return $check_robots_result;
     }
-//}
+}
 //------------------------------------------------------------------------------------------------
 
 if($_POST['action']=='getHtmlErrors'){
